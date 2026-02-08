@@ -1,0 +1,23 @@
+/* FILE: src/components/ui/FormField/FormField.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+
+.wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.hint {
+  color: $muted;
+  font-size: 12px;
+}
+
+.error {
+  color: $danger;
+  font-size: 12px;
+}

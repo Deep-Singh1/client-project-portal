@@ -1,0 +1,9 @@
+/* FILE: src/components/ui/Card/Card.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+@use "@/styles/mixins.scss" as *;
+
+.card {
+  @include card;
+  padding: $space-5;
+}

@@ -1,0 +1,53 @@
+/* FILE: src/components/ui/Button/Button.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 12px;
+  border: 1px solid $border;
+  background: $surface;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.button:hover {
+  border-color: #d7d9e3;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: $primary;
+  color: white;
+  border-color: $primary;
+}
+
+.primary:hover {
+  background: $primaryHover;
+  border-color: $primaryHover;
+}
+
+.danger {
+  background: $danger;
+  color: white;
+  border-color: $danger;
+}
+
+.small {
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.loading {
+  opacity: 0.8;
+  cursor: wait;
+}

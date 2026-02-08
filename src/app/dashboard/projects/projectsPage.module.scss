@@ -1,0 +1,131 @@
+/* FILE: src/app/dashboard/projects/projectsPage.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+@use "@/styles/mixins.scss" as *;
+
+.page {
+  display: grid;
+  gap: $space-4;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-3;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.subtle {
+  color: $muted;
+  font-size: 14px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  align-items: center;
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.input,
+.select {
+  height: 42px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid $border;
+  background: $surface;
+  color: $text;
+  font-weight: 600;
+}
+
+.input {
+  min-width: 260px;
+}
+
+.input:focus,
+.select:focus {
+  @include focusRing;
+}
+
+.tableCard {
+  padding: 0; /* override Card padding so header/rows align perfectly */
+  overflow: hidden;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr;
+  gap: $space-3;
+  padding: $space-3;
+  min-width: 760px; /* enables horizontal scroll on small screens */
+  align-items: center;
+}
+
+.headerRow {
+  font-weight: 900;
+}
+
+.divider {
+  border-top: 1px solid $border;
+}
+
+.rowLink {
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid $border;
+  transition: background 150ms ease;
+}
+
+.rowLink:hover {
+  background: rgba(17, 24, 39, 0.03);
+}
+
+.projectName {
+  font-weight: 900;
+}
+
+.muted {
+  color: $muted;
+}
+
+.empty {
+  padding: $space-3;
+  color: $muted;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  align-items: center;
+}
+
+.pageInfo {
+  font-weight: 700;
+}
+
+@include sm {
+  .titleRow h1 {
+    font-size: 24px;
+  }
+
+  .input {
+    min-width: 220px;
+  }
+}

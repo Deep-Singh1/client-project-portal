@@ -1,0 +1,229 @@
+/* FILE: src/app/dashboard/tickets/ticketDetail.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+@use "@/styles/mixins.scss" as *;
+
+.page {
+  display: grid;
+  gap: $space-4;
+}
+
+.breadcrumbRow {
+  display: flex;
+  gap: $space-3;
+  align-items: center;
+  flex-wrap: wrap;
+  color: $muted;
+  font-weight: 700;
+  font-size: 13px;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+.headerCard {
+  display: grid;
+  gap: $space-3;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-3;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.titleBlock {
+  display: grid;
+  gap: 8px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.desc {
+  color: $muted;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.chips {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.metaRow {
+  display: flex;
+  gap: $space-3;
+  flex-wrap: wrap;
+  color: $muted;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Main split layout */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: $space-3;
+  align-items: start;
+}
+
+/* Right panel */
+.panel {
+  display: grid;
+  gap: $space-3;
+
+  /* makes the controls feel anchored on desktop */
+  position: sticky;
+  top: 88px; /* below the topbar */
+}
+
+.panelTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.readOnly {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-3;
+}
+
+.select {
+  width: 100%;
+  height: 42px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid $border;
+  background: $surface;
+  color: $text;
+  font-weight: 700;
+}
+
+.select:focus {
+  @include focusRing;
+}
+
+/* Comments */
+.commentsCard {
+  display: grid;
+  gap: $space-3;
+}
+
+.commentsTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.commentList {
+  display: grid;
+  gap: $space-2;
+}
+
+.commentItem {
+  padding: $space-3;
+  border: 1px solid $border;
+  border-radius: 14px;
+  background: $surface;
+}
+
+.commentAuthor {
+  font-weight: 900;
+}
+
+.commentBody {
+  margin-top: 6px;
+  white-space: pre-wrap; /* keeps line breaks */
+  word-break: break-word; /* long text won’t overflow */
+}
+
+.commentMeta {
+  margin-top: 6px;
+  color: $muted;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.empty {
+  color: $muted;
+  font-weight: 700;
+}
+
+.commentForm {
+  display: grid;
+  gap: $space-2;
+}
+
+/* ✅ IMPORTANT: make textarea look like the rest of your UI */
+.commentForm textarea,
+.commentForm input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid $border;
+  background: $surface;
+  color: $text;
+  font-weight: 600;
+}
+
+.commentForm textarea:focus,
+.commentForm input:focus {
+  @include focusRing;
+}
+
+.commentForm textarea {
+  resize: vertical;
+  min-height: 92px;
+  line-height: 1.4;
+}
+
+.commentCtaRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@include md {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    position: static; /* disable sticky on small layouts */
+  }
+}
+
+@include sm {
+  .titleBlock h1 {
+    font-size: 24px;
+  }
+}

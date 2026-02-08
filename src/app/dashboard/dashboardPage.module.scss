@@ -1,0 +1,158 @@
+/* FILE: src/app/dashboard/dashboardPage.module.scss */
+
+@use "@/styles/tokens.scss" as *;
+@use "@/styles/mixins.scss" as *;
+
+.page {
+  display: grid;
+  gap: $space-4;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-3;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.subtle {
+  color: $muted;
+  font-size: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-3;
+}
+
+.kpiCard {
+  display: grid;
+  gap: $space-2;
+}
+
+.kpiLabel {
+  color: $muted;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.kpiValue {
+  font-size: 32px;
+  font-weight: 1000;
+  letter-spacing: -0.03em;
+}
+
+.kpiHint {
+  color: $muted;
+  font-size: 13px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.notifications {
+  display: grid;
+  gap: $space-2;
+}
+
+.noticeRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: 14px;
+  border: 1px solid $border;
+  background: $surface;
+}
+
+.noticeMain {
+  display: grid;
+  gap: 6px;
+}
+
+.noticeTitle {
+  font-weight: 900;
+}
+
+.noticeMeta {
+  color: $muted;
+  font-size: 13px;
+}
+
+.noticeActions {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.unreadDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: $primary;
+  margin-right: 8px;
+}
+
+.empty {
+  color: $muted;
+  padding: $space-3;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $space-3;
+}
+
+.list {
+  display: grid;
+  gap: $space-2;
+}
+
+.smallRow {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-2 0;
+  border-top: 1px solid $border;
+}
+
+.smallRow:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.smallKey {
+  color: $muted;
+  font-weight: 800;
+}
+
+.smallVal {
+  font-weight: 900;
+}
+
+@include md {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include sm {
+  .titleRow h1 {
+    font-size: 24px;
+  }
+}

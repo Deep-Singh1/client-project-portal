@@ -1,0 +1,35 @@
+/* FILE: src/styles/tokens.scss */
+
+/* Colors */
+$bg: #f6f7fb;
+$surface: #ffffff;
+$border: #e7e8ef;
+$text: #111827;
+$muted: #6b7280;
+
+/* Brand */
+$primary: #2563eb;
+$primaryHover: #1d4ed8;
+
+/* Status colors (simple, readable) */
+$success: #16a34a;
+$warning: #f59e0b;
+$danger: #dc2626;
+
+/* Typography */
+$font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji",
+  "Segoe UI Emoji";
+$radius: 14px;
+
+/* Spacing scale */
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-8: 32px;
+
+/* Shadow */
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);

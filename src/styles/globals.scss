@@ -1,0 +1,70 @@
+/* FILE: src/styles/globals.scss */
+
+@use "./tokens.scss" as *;
+@use "./mixins.scss" as *;
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: $font;
+  color: $text;
+  background: $bg;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid $border;
+  background: $surface;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #d7d9e3;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid $border;
+  background: $surface;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+  @include focusRing;
+}
+
+/* Helpers */
+.muted {
+  color: $muted;
+}
+
+.card {
+  @include card;
+}
