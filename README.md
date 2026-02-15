@@ -67,3 +67,21 @@ Key paths:
 ### 1) Install dependencies
 ```bash
 npm install
+<<<<<<< HEAD
+=======
+
+
+## Screenshots
+
+### Dashboard
+![Dashboard]
+(public/dashboard.png)
+
+### Projects
+![Projects]
+(public/projects.png)
+
+### Ticket Detail
+![Ticket Detail]
+(public/ticket.png)
+>>>>>>> de1d9ef (changes  README)
