@@ -1,33 +1,46 @@
 // FILE: src/components/AuthGate.tsx
 "use client";
 
-import type { ReactNode } from "react";
-import { useEffect, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getSession } from "@/lib/auth";
-import { useDbVersion } from "@/lib/useDbVersion";
+import React, { useEffect } from "react";
+import { useServerSession } from "@/lib/useServerSession";
 
-export default function AuthGate({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const dbVersion = useDbVersion();
+function safeNextPath(raw: string | null) {
+  if (!raw) return null;
+  if (!raw.startsWith("/")) return null;
+  if (raw.startsWith("//")) return null; // block protocol-relative redirects
+  return raw;
+}
 
-  const session = useMemo(() => getSession(), [dbVersion]);
-
-  const next = useMemo(() => {
-    const p = pathname ?? "/dashboard";
-    const qs = searchParams?.toString();
-    return qs ? `${p}?${qs}` : p;
-  }, [pathname, searchParams]);
+export default function AuthGate({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useServerSession();
 
   useEffect(() => {
-    if (!session) {
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
-    }
-  }, [session, next, router]);
+    if (loading) return;
+    if (session) return;
 
-  if (!session) return null;
+    // ✅ No useSearchParams / usePathname — use window location directly
+    const current = `${window.location.pathname}${window.location.search}`;
+    const next = safeNextPath(current) || "/dashboard/projects";
+
+    window.location.replace(`/login?next=${encodeURIComponent(next)}`);
+  }, [loading, session]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: 24 }}>
+        <p>Loading session…</p>
+      </div>
+    );
+  }
+
+  // Redirect triggered in effect; render nothing to avoid flicker
+  if (!session) {
+    return (
+      <div style={{ padding: 24 }}>
+        <p>Redirecting to login…</p>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

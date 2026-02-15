@@ -1,10 +1,11 @@
 // FILE: src/components/ui/Button/Button.tsx
 "use client";
 
+import React from "react";
 import styles from "./Button.module.scss";
 
-type Variant = "default" | "primary" | "danger";
-type Size = "md" | "sm";
+type Variant = "default" | "primary" | "danger" | "ghost";
+type Size = "md" | "sm" | "xs";
 
 export default function Button({
   children,
@@ -21,7 +22,9 @@ export default function Button({
     styles.button,
     variant === "primary" ? styles.primary : "",
     variant === "danger" ? styles.danger : "",
+    variant === "ghost" ? styles.ghost : "",
     size === "sm" ? styles.small : "",
+    size === "xs" ? styles.xsmall : "",
     loading ? styles.loading : "",
     props.className ?? "",
   ]

@@ -1,3 +1,4 @@
+// FILE: src/components/Tabs.tsx
 "use client";
 
 import React, { useEffect, useId, useMemo, useRef } from "react";
@@ -8,18 +9,21 @@ export type Tab = {
 };
 
 export function Tabs({
-  tabs,
+  tabs = [],
   activeId,
   onChange,
   ariaLabel = "Sections",
 }: {
-  tabs: Tab[];
+  tabs?: Tab[];
   activeId: string;
   onChange: (id: string) => void;
   ariaLabel?: string;
 }) {
   const baseId = useId();
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  // ✅ stable key to detect tab list changes without crashing
+  const tabsKey = useMemo(() => tabs.map((t) => t.id).join("|"), [tabs]);
 
   // If activeId becomes invalid (tabs changed), auto-fix by selecting the first tab.
   useEffect(() => {
@@ -28,12 +32,9 @@ export function Tabs({
       onChange(tabs[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabs.map((t) => t.id).join("|"), activeId]);
+  }, [tabsKey, activeId]);
 
-  const activeIndex = useMemo(
-    () => tabs.findIndex((t) => t.id === activeId),
-    [tabs, activeId]
-  );
+  const activeIndex = useMemo(() => tabs.findIndex((t) => t.id === activeId), [tabs, activeId]);
 
   function focusTab(index: number) {
     tabRefs.current[index]?.focus();
@@ -114,8 +115,6 @@ export function Tabs({
         })}
       </div>
 
-      {/* Panels are controlled by the parent; parent decides what to render below Tabs */}
-      {/* We still output a “current panel id” anchor for accessibility if you want it later */}
       <div
         id={`${baseId}-panel-${activeId}`}
         role="tabpanel"

@@ -8,124 +8,130 @@
   gap: $space-4;
 }
 
-.titleRow {
+.header {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: $space-3;
-
-  h1 {
-    margin: 0;
-    font-size: 28px;
-    letter-spacing: -0.02em;
-  }
-}
-
-.subtle {
-  color: $muted;
-  font-size: 14px;
-}
-
-.controls {
-  display: flex;
+  align-items: flex-start;
+  gap: $space-4;
   flex-wrap: wrap;
-  gap: $space-3;
-  align-items: center;
 }
 
-.control {
-  display: inline-flex;
+.headerActions {
+  display: flex;
   align-items: center;
   gap: $space-2;
 }
 
-.input,
-.select {
-  height: 42px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid $border;
-  background: $surface;
-  color: $text;
-  font-weight: 600;
-}
-
-.input {
-  min-width: 260px;
-}
-
-.input:focus,
-.select:focus {
-  @include focusRing;
-}
-
-.tableCard {
-  padding: 0; /* override Card padding so header/rows align perfectly */
-  overflow: hidden;
-}
-
-.tableWrap {
-  overflow-x: auto;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr 1fr;
-  gap: $space-3;
-  padding: $space-3;
-  min-width: 760px; /* enables horizontal scroll on small screens */
-  align-items: center;
-}
-
-.headerRow {
-  font-weight: 900;
-}
-
-.divider {
-  border-top: 1px solid $border;
-}
-
-.rowLink {
-  text-decoration: none;
-  color: inherit;
-  border-top: 1px solid $border;
-  transition: background 150ms ease;
-}
-
-.rowLink:hover {
-  background: rgba(17, 24, 39, 0.03);
-}
-
-.projectName {
-  font-weight: 900;
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
 }
 
 .muted {
   color: $muted;
+  font-size: 14px;
+  margin: $space-2 0 0 0;
 }
 
-.empty {
+.cardPad {
+  padding: $space-6; // overrides Card padding (Card class is added first)
+}
+
+.errorBox {
+  display: grid;
+  gap: $space-2;
   padding: $space-3;
-  color: $muted;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  background: rgba(220, 38, 38, 0.04);
 }
 
-.pagination {
-  display: flex;
-  flex-wrap: wrap;
+.errorTitle {
+  margin: 0;
+  font-weight: 1000;
+  color: $danger;
+}
+
+/* Cards grid */
+.grid {
+  display: grid;
   gap: $space-3;
-  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.pageInfo {
-  font-weight: 700;
+.projectLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.projectCard {
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.projectCard:hover {
+  transform: translateY(-1px);
+  box-shadow: $shadow-md;
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+.projectTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-3;
+}
+
+.projectName {
+  font-weight: 1000;
+  letter-spacing: -0.01em;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.projectMeta {
+  margin-top: $space-3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-3;
+}
+
+.metaLabel {
+  display: block;
+  color: $muted;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metaValue {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 800;
+  color: $text;
+}
+
+/* Responsive */
+@include md {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @include sm {
-  .titleRow h1 {
+  .title {
     font-size: 24px;
   }
 
-  .input {
-    min-width: 220px;
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .projectMeta {
+    grid-template-columns: 1fr;
   }
 }

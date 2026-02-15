@@ -2,41 +2,30 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { clearSession } from "@/lib/auth";
-import { emitDbUpdated } from "@/lib/dbEvents";
+import { useRouter } from "next/navigation";
 
 function safeNextPath(raw: string | null) {
   if (!raw) return null;
-  if (raw.startsWith("/")) return raw;
-  return null;
+  if (!raw.startsWith("/")) return null;
+  if (raw.startsWith("//")) return null;
+  return raw;
 }
 
 export default function LogoutPage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    clearSession();
+    async function run() {
+      await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
 
-    // ✅ trigger rerenders in this tab (AuthGate uses useDbVersion())
-    emitDbUpdated();
+      const params = new URLSearchParams(window.location.search);
+      const next = safeNextPath(params.get("next")) || "/dashboard/projects";
 
-    // ✅ trigger other tabs too (storage event)
-    try {
-      localStorage.setItem("cpp_session_updated_at", String(Date.now()));
-    } catch {
-      // ignore
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
     }
 
-    const next =
-      safeNextPath(searchParams?.get("next")) ||
-      safeNextPath(pathname) ||
-      "/dashboard";
-
-    router.replace(`/login?next=${encodeURIComponent(next)}`);
-  }, [router, pathname, searchParams]);
+    run();
+  }, [router]);
 
   return (
     <main style={{ padding: 24 }}>

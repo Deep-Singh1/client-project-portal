@@ -4,14 +4,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "./login.module.scss";
-import { inferRole, setSession } from "@/lib/auth";
-import { emitDbUpdated } from "@/lib/dbEvents";
 
 function safeNextPath(raw: string | null) {
-  // Only allow internal paths
   if (!raw) return null;
-  if (raw.startsWith("/")) return raw;
-  return null;
+  if (!raw.startsWith("/")) return null;
+  if (raw.startsWith("//")) return null; // ✅ block protocol-relative redirects
+  return raw;
 }
 
 export default function LoginPage() {
@@ -19,7 +17,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("client@demo.com");
   const [password, setPassword] = useState("demo123");
 
-  function onLogin(e?: React.FormEvent) {
+  async function onLogin(e?: React.FormEvent) {
     e?.preventDefault();
 
     const cleanEmail = email.trim().toLowerCase();
@@ -28,27 +26,21 @@ export default function LoginPage() {
       return;
     }
 
-    if (password !== "demo123") {
-      alert("Wrong password. Use demo123");
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: cleanEmail, password }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data?.ok) {
+      alert(data?.error?.message || "Login failed");
       return;
-    }
-
-    const role = inferRole(cleanEmail);
-    setSession({ email: cleanEmail, role });
-
-    // ✅ refresh app in same tab
-    emitDbUpdated();
-
-    // ✅ notify other tabs (storage event)
-    try {
-      localStorage.setItem("cpp_session_updated_at", String(Date.now()));
-    } catch {
-      // ignore
     }
 
     const params = new URLSearchParams(window.location.search);
     const next = safeNextPath(params.get("next"));
-
     router.replace(next || "/dashboard/projects");
   }
 
@@ -87,7 +79,7 @@ export default function LoginPage() {
         </form>
 
         <p className={styles.hint}>
-          Try:
+          Demo accounts:
           <br /> client@demo.com / demo123
           <br /> consultant@demo.com / demo123
           <br /> admin@demo.com / demo123

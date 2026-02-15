@@ -1,4 +1,5 @@
 // FILE: src/app/dashboard/layout.tsx
+import { Suspense } from "react";
 import AuthGate from "@/components/AuthGate";
 import { ToastProvider } from "@/components/ToastProvider";
 import styles from "./dashboardLayout.module.scss";
@@ -8,10 +9,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <AuthGate>
       <ToastProvider>
-        <div className={styles.shell}>
-          <DashboardTopbar />
-          <main className={styles.main}>{children}</main>
-        </div>
+        {/* ✅ Required when children (or layout components) use useSearchParams() */}
+        <Suspense fallback={<div style={{ padding: 24 }}>Loading dashboard…</div>}>
+          <div className={styles.shell}>
+            <DashboardTopbar />
+            <main className={styles.main}>{children}</main>
+          </div>
+        </Suspense>
       </ToastProvider>
     </AuthGate>
   );

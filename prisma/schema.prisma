@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id    String  @id @default(cuid())
+  email String  @unique
+  name  String?
+  role  Role    @default(CLIENT)
+
+  // ✅ new: password hash (scrypt format)
+  // Keeping default "" so migration is painless on an existing DB.
+  // Login will REFUSE accounts with empty passwordHash.
+  passwordHash String @default("")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  projectsOwned Project[] @relation("ProjectOwner")
+}
+
+model Project {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  status    ProjectStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  ownerId          String?
+  clientEmail      String
+  consultantEmails String[] @default([])
+  customer         String
+
+  docs          Doc[]
+  milestones    Milestone[]
+  tickets       Ticket[]
+  notifications Notification[]
+
+  owner User? @relation("ProjectOwner", fields: [ownerId], references: [id])
+}
+
+model Ticket {
+  id            String         @id @default(cuid())
+  projectId     String
+  title         String
+  description   String         @default("")
+  status        TicketStatus   @default(OPEN)
+  priority      TicketPriority @default(MEDIUM)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  assigneeEmail String         @default("consultant@demo.com")
+
+  project  Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  comments TicketComment[]
+}
+
+model Milestone {
+  id        String          @id @default(cuid())
+  projectId String
+  title     String
+  dueDate   DateTime
+  progress  Int             @default(0)
+  status    MilestoneStatus @default(DRAFT)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Doc {
+  id         String      @id @default(cuid())
+  projectId  String
+  title      String
+  category   DocCategory @default(CONTRACT)
+  tags       String[]    @default([])
+  uploadedAt DateTime
+  createdAt  DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  recipientEmail String
+  projectId      String?
+  type           String    @default("info")
+  message        String
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([recipientEmail])
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+model TicketComment {
+  id          String   @id @default(cuid())
+  ticketId    String
+  authorEmail String
+  body        String
+  createdAt   DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+enum Role {
+  ADMIN
+  CONSULTANT
+  CLIENT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  IN_REVIEW
+  BLOCKED
+  DONE
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MilestoneStatus {
+  DRAFT
+  READY_FOR_APPROVAL
+  APPROVED
+}
+
+enum DocCategory {
+  CONTRACT
+  INVOICE
+  TECHNICAL
+  OTHER
+}

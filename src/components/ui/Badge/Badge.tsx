@@ -1,4 +1,3 @@
-// FILE: src/components/ui/Badge/Badge.tsx
 import styles from "./Badge.module.scss";
 
 export type Tone =
@@ -17,12 +16,10 @@ export default function Badge({
   children: React.ReactNode;
   tone?: Tone;
 }) {
-  const className = [
-    styles.badge,
-    tone !== "default" ? (styles as any)[tone] : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const toneClass =
+    tone !== "default" ? styles[tone as keyof typeof styles] : "";
+
+  const className = [styles.badge, toneClass].filter(Boolean).join(" ");
 
   return <span className={className}>{children}</span>;
 }

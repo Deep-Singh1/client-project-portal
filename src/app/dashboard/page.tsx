@@ -1,101 +1,173 @@
 // FILE: src/app/dashboard/page.tsx
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-import { getSession } from "@/lib/auth";
-import {
-  getNotifications,
-  getVisibleProjects,
-  getTickets,
-  getMilestones,
-  markNotificationRead,
-} from "@/lib/secureStore";
-
-import { useDbVersion } from "@/lib/useDbVersion";
+import { useServerSession } from "@/lib/useServerSession";
 
 import Card from "@/components/ui/Card/Card";
-import Button from "@/components/ui/Button/Button";
 import Badge from "@/components/ui/Badge/Badge";
+import Button from "@/components/ui/Button/Button";
 import styles from "./dashboardPage.module.scss";
 
+type DashboardProject = {
+  id: string;
+  name: string;
+  customer: string;
+  status: string; // API sends label like "Active", "On hold", ...
+  updatedAt: string; // date-only string
+  clientEmail: string;
+  consultantEmails: string[];
+  openTickets: number;
+  overdueMilestones: number;
+};
+
+type ApiNotification = {
+  id: string;
+  type: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+  readAt: string | null;
+  projectId: string | null;
+};
+
+type DashboardResponse = {
+  ok: boolean;
+  summary?: { projects: number; openTickets: number; overdueMilestones: number };
+  projects?: DashboardProject[];
+  notifications?: ApiNotification[];
+  error?: { message?: string };
+};
+
+async function fetchDashboard(): Promise<DashboardResponse> {
+  const res = await fetch("/api/dashboard", { cache: "no-store" });
+  const data = (await res.json().catch(() => ({}))) as DashboardResponse;
+
+  if (!res.ok || !data?.ok) {
+    throw new Error(data?.error?.message || `Request failed: ${res.status}`);
+  }
+  return data;
+}
+
+async function markNotificationRead(id: string) {
+  const res = await fetch(`/api/notifications/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "markRead" }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data?.ok) {
+    throw new Error(data?.error?.message || `Request failed: ${res.status}`);
+  }
+}
+
+function projectTone(status: string) {
+  const s = status.toLowerCase();
+  if (s.includes("active")) return "success";
+  if (s.includes("on hold") || s.includes("hold")) return "warning";
+  if (s.includes("completed") || s.includes("done")) return "neutral";
+  return "primary";
+}
+
 export default function DashboardPage() {
-  const dbVersion = useDbVersion();
+  const { session, loading: sessionLoading } = useServerSession();
 
-  const session = useMemo(() => getSession(), [dbVersion]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
 
+  const [projects, setProjects] = useState<DashboardProject[]>([]);
+  const [summary, setSummary] = useState<{
+    projects: number;
+    openTickets: number;
+    overdueMilestones: number;
+  } | null>(null);
+
+  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
+
+  async function load() {
+    try {
+      setLoading(true);
+      setErr(null);
+
+      const data = await fetchDashboard();
+      setProjects(data.projects ?? []);
+      setSummary(data.summary ?? null);
+      setNotifications(data.notifications ?? []);
+    } catch (e: any) {
+      setErr(e?.message || "Failed to load dashboard");
+      setProjects([]);
+      setSummary(null);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!session) return;
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.email, session?.role]);
+
+  if (sessionLoading) {
+    return <div className={styles.page}>Loading…</div>;
+  }
+
+  // AuthGate should already redirect, but keep a safe fallback
   if (!session) {
     return <div className={styles.page}>Please log in.</div>;
   }
 
-  const projects = useMemo(() => getVisibleProjects(session), [session, dbVersion]);
-
-  const analytics = useMemo(() => {
-    let openTickets = 0;
-    let overdueMilestones = 0;
-
-    const today = new Date().toISOString().slice(0, 10);
-
-    for (const p of projects) {
-      const tickets = getTickets(session, p.id);
-      const milestones = getMilestones(session, p.id);
-
-      openTickets += tickets.filter((t) => String(t.status).toLowerCase() !== "done").length;
-
-      overdueMilestones += milestones.filter((m) => {
-        const isOverdue = m.dueDate < today;
-        const notApproved = String(m.status).toLowerCase() !== "approved";
-        return isOverdue && notApproved;
-      }).length;
-    }
-
-    return { openTickets, overdueMilestones };
-  }, [projects, session, dbVersion]);
-
-  const notifications = useMemo(() => getNotifications(session), [session, dbVersion]);
-
-  function isUnread(n: any) {
-    // supports both shapes:
-    // - { read: boolean } (store.ts)
-    // - { readAt?: string | null } (older shape)
-    if (typeof n.read === "boolean") return !n.read;
-    return !n.readAt;
-  }
-
-  function markRead(id: string) {
-    markNotificationRead(session, id);
-    // no manual refresh needed — saveDB emits dbUpdated event -> useDbVersion rerenders
-  }
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className={styles.page}>
       <div className={styles.titleRow}>
         <h1>Dashboard</h1>
-        <div className={styles.subtle}>Last updated: {new Date().toLocaleString()}</div>
+        <div className={styles.subtle}>Backend mode</div>
       </div>
 
-      {/* KPIs */}
-      <div className={styles.grid}>
-        <Card className={styles.kpiCard as any}>
-          <div className={styles.kpiLabel}>Open tickets</div>
-          <div className={styles.kpiValue}>{analytics.openTickets}</div>
-          <div className={styles.kpiHint}>Across your visible projects</div>
+      {loading ? (
+        <Card className={styles.kpiCard}>
+          <div className={styles.kpiLabel}>Loading…</div>
+          <div className={styles.kpiHint}>Fetching your dashboard from database.</div>
         </Card>
-
-        <Card className={styles.kpiCard as any}>
-          <div className={styles.kpiLabel}>Overdue milestones</div>
-          <div className={styles.kpiValue}>{analytics.overdueMilestones}</div>
-          <div className={styles.kpiHint}>Due date passed & not approved</div>
+      ) : err ? (
+        <Card className={styles.kpiCard}>
+          <div className={styles.kpiLabel}>Error</div>
+          <div className={styles.kpiHint}>{err}</div>
+          <div style={{ marginTop: 12 }}>
+            <Button size="sm" onClick={() => load()}>
+              Retry
+            </Button>
+          </div>
         </Card>
+      ) : null}
 
-        <Card className={styles.kpiCard as any}>
-          <div className={styles.kpiLabel}>Projects</div>
-          <div className={styles.kpiValue}>{projects.length}</div>
-          <div className={styles.kpiHint}>Active visibility via role</div>
-        </Card>
-      </div>
+      {!loading && !err && summary ? (
+        <div className={styles.grid}>
+          <Card className={styles.kpiCard}>
+            <div className={styles.kpiLabel}>Open tickets</div>
+            <div className={styles.kpiValue}>{summary.openTickets}</div>
+            <div className={styles.kpiHint}>Across your visible projects</div>
+          </Card>
 
-      {/* Split area: Notifications + Quick stats */}
+          <Card className={styles.kpiCard}>
+            <div className={styles.kpiLabel}>Overdue milestones</div>
+            <div className={styles.kpiValue}>{summary.overdueMilestones}</div>
+            <div className={styles.kpiHint}>Due date passed & not approved</div>
+          </Card>
+
+          <Card className={styles.kpiCard}>
+            <div className={styles.kpiLabel}>Projects</div>
+            <div className={styles.kpiValue}>{summary.projects}</div>
+            <div className={styles.kpiHint}>Visible for your role</div>
+          </Card>
+        </div>
+      ) : null}
+
       <div className={styles.split}>
         <Card>
           <h2 className={styles.sectionTitle}>Notifications</h2>
@@ -104,23 +176,28 @@ export default function DashboardPage() {
             <div className={styles.empty}>You’re all caught up.</div>
           ) : (
             <div className={styles.notifications}>
-              {notifications.slice(0, 8).map((n: any) => (
+              {notifications.slice(0, 8).map((n) => (
                 <div key={n.id} className={styles.noticeRow}>
                   <div className={styles.noticeMain}>
                     <div className={styles.noticeTitle}>
-                      {isUnread(n) ? <span className={styles.unreadDot} /> : null}
+                      {!n.read ? <span className={styles.unreadDot} /> : null}
                       Notification
                     </div>
 
                     <div className={styles.noticeMeta}>
-                      {n.message ?? ""}
-                      {n.createdAt ? ` • ${n.createdAt}` : ""}
+                      {n.message} {n.createdAt ? ` • ${n.createdAt}` : ""}
                     </div>
                   </div>
 
                   <div className={styles.noticeActions}>
-                    {isUnread(n) ? (
-                      <Button size="sm" onClick={() => markRead(n.id)}>
+                    {!n.read ? (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          await markNotificationRead(n.id);
+                          await load();
+                        }}
+                      >
                         Mark read
                       </Button>
                     ) : (
@@ -149,9 +226,7 @@ export default function DashboardPage() {
 
             <div className={styles.smallRow}>
               <div className={styles.smallKey}>Unread notifications</div>
-              <div className={styles.smallVal}>
-                {notifications.filter((x: any) => isUnread(x)).length}
-              </div>
+              <div className={styles.smallVal}>{unreadCount}</div>
             </div>
 
             <div className={styles.smallRow}>
@@ -163,6 +238,45 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      <Card style={{ marginTop: 16 }}>
+        <h2 className={styles.sectionTitle}>Your projects</h2>
+
+        {projects.length === 0 ? (
+          <div className={styles.empty}>No projects visible.</div>
+        ) : (
+          <div style={{ display: "grid", gap: 10 }}>
+            {projects.map((p) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: 12,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  borderRadius: 12,
+                }}
+              >
+                <div style={{ display: "grid", gap: 4 }}>
+                  <div style={{ fontWeight: 900 }}>{p.name}</div>
+                  <div className={styles.subtle}>
+                    {p.customer} • Updated {p.updatedAt}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Badge tone={projectTone(p.status) as any}>{p.status}</Badge>
+                  <Link href={`/dashboard/projects/${p.id}`}>
+                    <Button size="sm">Open</Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

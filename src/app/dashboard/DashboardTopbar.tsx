@@ -2,21 +2,31 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { getSession } from "@/lib/auth";
-import { useDbVersion } from "@/lib/useDbVersion";
 import styles from "./dashboardLayout.module.scss";
+import { getServerSession, type SessionUser } from "@/lib/clientSession";
 
 export default function DashboardTopbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // ✅ rerender on any local db/session change event
-  const dbVersion = useDbVersion();
+  const [session, setSession] = useState<SessionUser | null>(null);
 
-  const session = useMemo(() => getSession(), [dbVersion]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const s = await getServerSession();
+      if (!cancelled) setSession(s);
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const next = useMemo(() => {
     const p = pathname ?? "/dashboard";

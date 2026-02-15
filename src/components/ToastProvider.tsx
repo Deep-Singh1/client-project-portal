@@ -1,6 +1,7 @@
+// FILE: src/components/ToastProvider.tsx
 "use client";
 
-import React, { createContext, useContext, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useRef, useState } from "react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -26,35 +27,34 @@ export function useToast() {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
+  const idCounterRef = useRef(0);
 
-  function remove(id: string) {
+  const remove = useCallback((id: string) => {
     const t = timersRef.current.get(id);
     if (t) window.clearTimeout(t);
     timersRef.current.delete(id);
+
     setToasts((prev) => prev.filter((x) => x.id !== id));
-  }
+  }, []);
 
-  const value = useMemo(
-    () => ({
-      push: (t: Omit<Toast, "id">) => {
-        const id = `toast_${Math.random().toString(16).slice(2)}_${Date.now()}`;
-        const toast: Toast = { id, ...t };
-        setToasts((prev) => [toast, ...prev]);
+  const push = useCallback(
+    (t: Omit<Toast, "id">) => {
+      idCounterRef.current += 1;
+      const id = `toast_${idCounterRef.current}`;
 
-        // auto-remove after 4s
-        const timer = window.setTimeout(() => remove(id), 4000);
-        timersRef.current.set(id, timer);
-      },
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+      const toast: Toast = { id, ...t };
+      setToasts((prev) => [toast, ...prev]);
+
+      const timer = window.setTimeout(() => remove(id), 4000);
+      timersRef.current.set(id, timer);
+    },
+    [remove]
   );
 
   return (
-    <ToastContext.Provider value={value}>
+    <ToastContext.Provider value={{ push }}>
       {children}
 
-      {/* One live region for all toasts */}
       <div
         aria-live="polite"
         aria-relevant="additions text"
@@ -71,7 +71,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       >
         {toasts.map((t) => {
-          // Errors should be more urgent for screen readers
           const role = t.type === "error" ? "alert" : "status";
 
           return (
