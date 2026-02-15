@@ -1,6 +1,8 @@
 # Client Project Portal (Next.js + Prisma + Postgres)
 
 ![CI](https://github.com/Deep-Singh1/client-project-portal/actions/workflows/ci.yml/badge.svg)
+**Live Demo:** [client-project-portal-neon.vercel.app](https://client-project-portal-neon.vercel.app)
+
 
 A portfolio SaaS-style portal where **clients, consultants, and admins** can track projects, tickets, milestones, documents, and notifications — with server-side RBAC checks and a DB-backed dashboard.
 
