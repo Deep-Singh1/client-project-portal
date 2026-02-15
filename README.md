@@ -65,7 +65,7 @@ Key paths:
 - A Postgres database (local Postgres, Docker, or hosted like Neon)
 
 ### 1) Install dependencies
-```bash
+```bash```
 npm install
 
 
