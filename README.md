@@ -67,11 +67,7 @@ Key paths:
 ### 1) Install dependencies
 ```bash
 npm install
-<<<<<<< HEAD
-=======
 
-
-## Screenshots
 
 ### Dashboard
 ![Dashboard](public/dashboard.png)
