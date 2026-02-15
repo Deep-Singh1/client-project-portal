@@ -69,11 +69,14 @@ Key paths:
 npm install
 
 
+## Screenshots
+
 ### Dashboard
-![Dashboard](public/dashboard.png)
+![Dashboard](./public/dashboard.png)
 
 ### Projects
-![Projects](public/projects.png)
+![Projects](./public/projects.png)
 
 ### Ticket Detail
-![Ticket Detail](public/ticket.png)
+![Ticket Detail](./public/ticket.png)
+
